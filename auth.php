@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Authentication Plugin: Manual Authentication
- * Just does a simple check against the moodle database.
+ * Authentication Plugin: CampusConnect Authentication.
  *
  * @package    auth_campusconnect
  * @copyright  2012 Synergy Learning
@@ -37,18 +36,18 @@ global $CFG;
 require_once($CFG->libdir.'/authlib.php');
 
 /**
- * CampusConnect authentication plugin.
- */
-/**
- * Manual authentication plugin.
+ * Class for CampusConnect authentication plugin.
  *
- * @package    auth
- * @subpackage manual
+ * @package    auth_campusconnect
  * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auth_plugin_campusconnect extends auth_plugin_base {
 
+    /**
+     * authenticateduser
+     * @var mixed
+     */
     public static $authenticateduser;
 
     /**
@@ -76,6 +75,11 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         return false;
     }
 
+    /**
+     * Prevent local passwords.
+     *
+     * @return mixed
+     */
     public function prevent_local_passwords() {
         return false;
     }
@@ -216,6 +220,13 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         return self::get_user_details($authinfo->ecsid, $authinfo->pid, $authinfo->participant, $params);
     }
 
+    /**
+     * Extract url params
+     *
+     * @param mixed $url
+     *
+     * @return mixed
+     */
     protected static function extract_url_params($url) {
         $urlparse = parse_url($url);
         if (!is_array($urlparse) || !isset($urlparse['query'])) {
@@ -235,6 +246,14 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         return $paramassoc;
     }
 
+    /**
+     * Check course url.
+     *
+     * @param mixed $url
+     * @param mixed $params
+     *
+     * @return mixed
+     */
     protected static function check_course_url($url, $params) {
         if (!isset($params['id'])) {
             self::log("No courseid in the destination URL");
@@ -254,6 +273,16 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         return $courseurl;
     }
 
+    /**
+     * Authenticate from params.
+     *
+     * @param mixed $fullurl
+     * @param mixed $params
+     * @param mixed $courseurl
+     *
+     * @return mixed
+     *
+     */
     protected static function authenticate_from_params($fullurl, $params, $courseurl) {
         // Extract the hash from the params.
         $hash = null;
@@ -377,6 +406,16 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         return (object)['ecsid' => $authenticatingecs, 'pid' => $pid, 'participant' => $participant];
     }
 
+    /**
+     * Use authentication token.
+     *
+     * @param mixed $ecsid
+     * @param mixed $mid
+     * @param mixed $courseid
+     *
+     * @return mixed
+     *
+     */
     protected static function use_authentication_token($ecsid, $mid, $courseid) {
         // Check the participant settings to see if we should be handling tokens from this participant.
         $export = new export($courseid);
@@ -387,6 +426,17 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         return false;
     }
 
+    /**
+     * Get user details
+     *
+     * @param mixed $ecsid
+     * @param mixed $pid
+     * @param participantsettings $participant
+     * @param mixed $params
+     *
+     * @return mixed
+     *
+     */
     protected static function get_user_details($ecsid, $pid, participantsettings $participant, $params) {
 
         list($personidtype, $personid) = self::get_person_id($params);
@@ -409,6 +459,14 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         return $userdetails;
     }
 
+    /**
+     * Get person id.
+     *
+     * @param mixed $params
+     *
+     * @return mixed
+     *
+     */
     protected static function get_person_id($params) {
         if (isset($params[courselink::PERSON_ID_TYPE])) {
             // Using newer version.
@@ -439,7 +497,9 @@ class auth_plugin_campusconnect extends auth_plugin_base {
 
     /**
      * Return the given URL with the port number removed.
-     * @param $url
+     *
+     * @param mixed $url
+     *
      * @return string
      */
     public static function strip_port($url) {
@@ -460,6 +520,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
     /**
      * Logout - check if user is enrolled in any course, if not, delete
      *
+     * @return mixed
      */
     public function prelogout_hook() {
         global $USER, $DB;
@@ -501,6 +562,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * Cron - delete users who timed out and never enrolled,
      * Inactivate users who haven't been active for some time
      * And notify relevant users about users created
+     * @return mixed
      */
     protected function cron() {
         global $CFG, $DB;
@@ -615,10 +677,27 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         return true;
     }
 
+    /**
+     * Matches ecsid.
+     *
+     * @param mixed $pids
+     * @param mixed $ecsid
+     *
+     * @return mixed
+     *
+     */
     protected static function matches_ecsid($pids, $ecsid) {
         return in_array($ecsid, self::get_ecsids($pids));
     }
 
+    /**
+     * Get ecsids.
+     *
+     * @param mixed $pids
+     *
+     * @return mixed
+     *
+     */
     protected static function get_ecsids($pids) {
         $pids = explode(',', $pids);
         $ecsids = [];
@@ -646,7 +725,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * @param int $ecsid - the ECS that authenticated the user
      * @param int $pid - the ID of the participant the user came from
      * @param participantsettings $participant
-     * @internal param string $username
+     *
      * @return string
      */
     protected static function username_from_params($institution, $ecsusername, $personidtype, $personid,
@@ -711,6 +790,8 @@ class auth_plugin_campusconnect extends auth_plugin_base {
     }
 
     /**
+     * Generate unique username.
+     *
      * @param string $orgabbr
      * @param string|null $ecsusername
      * @return string
@@ -741,6 +822,16 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         return $username;
     }
 
+    /**
+     * Update user pid.
+     *
+     * @param mixed $ecsuser
+     * @param mixed $ecsid
+     * @param mixed $pid
+     *
+     * @return mixed
+     *
+     */
     protected static function update_user_pid($ecsuser, $ecsid, $pid) {
         global $DB;
 
@@ -760,7 +851,10 @@ class auth_plugin_campusconnect extends auth_plugin_base {
 
     /**
      * Removes all personal information from a user table, deletes the user and all logs
+     *
      * @param object $user
+     *
+     * @return void
      */
     private function user_dataprotect_delete($user) {
         global $DB;
@@ -784,10 +878,26 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         $DB->delete_records('log', ['userid' => $user->id]);
     }
 
+    /**
+     * Add string value to log.
+     *
+     * @param mixed $msg
+     *
+     * @return void
+     *
+     */
     protected static function log($msg) {
         log::add($msg, true, false, false);
     }
 
+    /**
+     * Add oblect values to log.
+     *
+     * @param mixed $obj
+     *
+     * @return void
+     *
+     */
     protected static function log_print_r($obj) {
         log::add_object($obj, true, false);
     }

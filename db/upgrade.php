@@ -25,6 +25,14 @@
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Xmldb auth campusconnect upgrade.
+ *
+ * @param mixed $oldversion
+ *
+ * @return mixed
+ *
+ */
 function xmldb_auth_campusconnect_upgrade($oldversion) {
     global $DB, $CFG;
 

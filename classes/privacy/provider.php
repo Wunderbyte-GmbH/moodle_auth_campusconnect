@@ -45,7 +45,10 @@ class provider implements \core_privacy\local\metadata\provider,
                           \core_privacy\local\request\core_userlist_provider {
 
     /**
+     * Get metadata.
+     *
      * @param collection $collection
+     *
      * @return collection
      */
     public static function get_metadata(collection $collection): collection {
@@ -65,6 +68,8 @@ class provider implements \core_privacy\local\metadata\provider,
     }
 
     /**
+     * Get contexts for userid.
+     *
      * @param int $userid
      * @return \core_privacy\local\request\contextlist
      */
@@ -84,7 +89,11 @@ class provider implements \core_privacy\local\metadata\provider,
     }
 
     /**
+     * Export user data.
+     *
      * @param approved_contextlist $contextlist
+     *
+     * @return void
      */
     public static function export_user_data(approved_contextlist $contextlist) {
         global $DB;
@@ -119,7 +128,10 @@ class provider implements \core_privacy\local\metadata\provider,
 
     /**
      * This will break CampusConnect logins for all users on the site.
+     *
      * @param \context $context
+     *
+     * @return void
      */
     public static function delete_data_for_all_users_in_context(\context $context) {
         global $DB;
@@ -133,7 +145,11 @@ class provider implements \core_privacy\local\metadata\provider,
     }
 
     /**
+     * Delete data for user.
+     *
      * @param approved_contextlist $contextlist
+     *
+     * @return void
      */
     public static function delete_data_for_user(approved_contextlist $contextlist) {
         global $DB;
@@ -151,7 +167,11 @@ class provider implements \core_privacy\local\metadata\provider,
     }
 
     /**
+     * Get users in context.
+     *
      * @param userlist $userlist
+     *
+     * @return void
      */
     public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
@@ -167,7 +187,11 @@ class provider implements \core_privacy\local\metadata\provider,
     }
 
     /**
+     * Delete data for users.
+     *
      * @param approved_userlist $userlist
+     *
+     * @return void
      */
     public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;

@@ -38,8 +38,23 @@ use core_privacy\tests\provider_testcase;
  * @covers \auth_campusconnect\auth
  */
 class privacy_provider_test extends provider_testcase {
+
+    /**
+     * userwithrecord
+     * @var mixed
+     */
     protected $userwithrecord;
+
+    /**
+     * userwithrecord2
+     * @var mixed
+     */
     protected $userwithrecord2;
+
+    /**
+     * userwithoutrecord
+     * @var mixed
+     */
     protected $userwithoutrecord;
 
     /**

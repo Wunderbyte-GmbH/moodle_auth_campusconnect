@@ -25,6 +25,12 @@
 // phpcs:ignore
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Auth campusconnect populate lastenroled.
+ *
+ * @return void
+ *
+ */
 function auth_campusconnect_populate_lastenroled() {
     global $DB;
     echo html_writer::tag('p', "Updating all 'last enroled' dates - this may take a while to run ...");

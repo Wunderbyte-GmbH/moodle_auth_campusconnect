@@ -19,6 +19,7 @@
  *
  * @package    auth_campusconnect
  * @copyright  2012 Synergy Learning
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['auth_campusconnectdescription'] = 'Authenticates user from another participant by verifying ECS hash in the URL against the ECS server';
