@@ -27,8 +27,13 @@ namespace auth_campusconnect;
 use local_campusconnect\enrolment;
 use local_campusconnect\log;
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * Class to handle user events
+ *
+ * @package   auth_campusconnect
+ * @copyright 2016 Davo Smith, Synergy Learning
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class user_events {
     /**
      * Handle user enrolment events - update 'last enroled' value + notify ECS (if needed).

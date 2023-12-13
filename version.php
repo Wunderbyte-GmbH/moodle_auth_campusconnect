@@ -17,14 +17,14 @@
 /**
  * Version details
  *
- * @package    campusconnect
+ * @package    auth_campusconnect
  * @copyright  2012 Synergy Learning
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2023092600;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires = 2017111300;        // M3.4+
+$plugin->version = 2023092600;  // The current plugin version (Date: YYYYMMDDXX).
+$plugin->requires = 2017111300; // M3.4+.
 $plugin->cron = 300;
-$plugin->component = 'auth_campusconnect';        // Full name of the plugin (used for diagnostics)
+$plugin->component = 'auth_campusconnect'; // Full name of the plugin (used for diagnostics).
 $plugin->dependencies = ['local_campusconnect' => ANY_VERSION];

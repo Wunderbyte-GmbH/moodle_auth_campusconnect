@@ -33,8 +33,13 @@ use core_privacy\local\request\transform;
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * Class for privacy provider - user information stored
+ *
+ * @package   auth_campusconnect
+ * @copyright 2019 Davo Smith, Synergy Learning
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class provider implements \core_privacy\local\metadata\provider,
                           \core_privacy\local\request\plugin\provider,
                           \core_privacy\local\request\core_userlist_provider {

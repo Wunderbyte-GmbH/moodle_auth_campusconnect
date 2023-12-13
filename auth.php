@@ -1,7 +1,26 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * @package    campusconnect
+ * Authentication Plugin: Manual Authentication
+ * Just does a simple check against the moodle database.
+ *
+ * @package    auth_campusconnect
  * @copyright  2012 Synergy Learning
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 use local_campusconnect\connect;
@@ -12,14 +31,21 @@ use local_campusconnect\export;
 use local_campusconnect\log;
 use local_campusconnect\participantsettings;
 
-if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.'); // It must be included from a Moodle page.
-}
+defined('MOODLE_INTERNAL') || die();
+
 global $CFG;
 require_once($CFG->libdir.'/authlib.php');
 
 /**
  * CampusConnect authentication plugin.
+ */
+/**
+ * Manual authentication plugin.
+ *
+ * @package    auth
+ * @subpackage manual
+ * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auth_plugin_campusconnect extends auth_plugin_base {
 
@@ -40,7 +66,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * @param string $password The password (with system magic quotes)
      * @return bool Authentication success or failure.
      */
-    function user_login($username, $password) {
+    public function user_login($username, $password) {
         if (isset(self::$authenticateduser)
             && is_object(self::$authenticateduser)
             && isset(self::$authenticateduser->id)
@@ -50,7 +76,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         return false;
     }
 
-    function prevent_local_passwords() {
+    public function prevent_local_passwords() {
         return false;
     }
 
@@ -59,7 +85,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      *
      * @return bool
      */
-    function is_internal() {
+    public function is_internal() {
         return false;
     }
 
@@ -68,7 +94,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * This method is called from login/index.php page for all enabled auth plugins.
      *
      */
-    function loginpage_hook() {
+    public function loginpage_hook() {
         global $SESSION, $CFG, $DB;
 
         self::log("\n\n====Login required - checking for CampusConnect authentication====");
@@ -100,7 +126,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
             $ccuser->lang = $CFG->lang;
             $ccuser->timecreated = time();
             if (!$id = $DB->insert_record('user', $ccuser)) {
-                print_error('errorcreatinguser', 'auth_campusconnect');
+                throw new \moodle_exception('errorcreatinguser', 'auth_campusconnect', '', $ccuser->username);
             }
             $ccuser = get_complete_user_data('id', $id);
         }
@@ -435,7 +461,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * Logout - check if user is enrolled in any course, if not, delete
      *
      */
-    function prelogout_hook() {
+    public function prelogout_hook() {
         global $USER, $DB;
         if ($USER->auth != $this->authtype) {
             return;
@@ -467,7 +493,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * @param string $username username
      * @return mixed array with no magic quotes or false on error
      */
-    function get_userinfo($username) {
+    public function get_userinfo($username) {
         return [];
     }
 
@@ -476,7 +502,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * Inactivate users who haven't been active for some time
      * And notify relevant users about users created
      */
-    function cron() {
+    protected function cron() {
         global $CFG, $DB;
 
         // Find users whose session should have expired by now and haven't ever enroled in a course.
