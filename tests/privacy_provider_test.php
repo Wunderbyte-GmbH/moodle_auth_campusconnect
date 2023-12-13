@@ -27,7 +27,7 @@ use core_privacy\local\metadata\collection;
 
 defined('MOODLE_INTERNAL') || die();
 
-class auth_campusconnect_privacy_provider_testcase extends \core_privacy\tests\provider_testcase {
+class privacy_provider_test extends \core_privacy\tests\provider_testcase {
     protected $userwithrecord;
     protected $userwithrecord2;
     protected $userwithoutrecord;

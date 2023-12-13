@@ -42,22 +42,22 @@ class user_events {
         if ($event->relateduserid == $USER->id) {
             $user = $USER;
         } else {
-            $user = $DB->get_record('user', array('id' => $event->relateduserid));
+            $user = $DB->get_record('user', ['id' => $event->relateduserid]);
         }
 
         if ($user->auth !== 'campusconnect') {
             return true; // Only interested in users who authenticated via Campus Connect.
         }
 
-        if (!$authrec = $DB->get_record('auth_campusconnect', array('username' => $user->username))) {
+        if (!$authrec = $DB->get_record('auth_campusconnect', ['username' => $user->username])) {
             log::add("auth_campusconnect - user '{$user->username}' missing record in auth_campusconnect database table");
             return true; // I don't think this should ever happen, but avoid throwing a fatal error.
         }
 
-        $upd = (object)array(
+        $upd = (object)[
             'id' => $authrec->id,
             'lastenroled' => $event->timecreated,
-        );
+        ];
         $DB->update_record('auth_campusconnect', $upd);
 
         enrolment::set_status($event->courseid, $user, enrolment::STATUS_ACTIVE);
@@ -77,7 +77,7 @@ class user_events {
         if ($event->relateduserid == $USER->id) {
             $user = $USER;
         } else {
-            $user = $DB->get_record('user', array('id' => $event->relateduserid));
+            $user = $DB->get_record('user', ['id' => $event->relateduserid]);
         }
 
         if ($user->auth != 'campusconnect') {
@@ -108,7 +108,7 @@ class user_events {
             return true;  // Only interested in users who authenticated via Campus Connect.
         }
 
-        $oldsuspended = $DB->get_field('auth_campusconnect', 'suspended', array('username' => $user->username));
+        $oldsuspended = $DB->get_field('auth_campusconnect', 'suspended', ['username' => $user->username]);
         if ($oldsuspended && !$user->suspended) {
             $status = enrolment::STATUS_ACTIVE; // User no longer suspended - mark all enrolments as active.
         } else if (!$oldsuspended && $user->suspended) {
@@ -116,7 +116,7 @@ class user_events {
         } else {
             return true; // No change in suspended status.
         }
-        $DB->set_field('auth_campusconnect', 'suspended', $user->suspended, array('username' => $user->username));
+        $DB->set_field('auth_campusconnect', 'suspended', $user->suspended, ['username' => $user->username]);
 
         // Update status for all courses the user is enroled in.
         foreach (enrol_get_all_users_courses($user->id) as $course) {

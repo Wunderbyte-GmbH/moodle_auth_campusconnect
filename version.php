@@ -27,4 +27,4 @@ $plugin->version = 2023092600;        // The current plugin version (Date: YYYYM
 $plugin->requires = 2017111300;        // M3.4+
 $plugin->cron = 300;
 $plugin->component = 'auth_campusconnect';        // Full name of the plugin (used for diagnostics)
-$plugin->dependencies = array('local_campusconnect' => ANY_VERSION);
+$plugin->dependencies = ['local_campusconnect' => ANY_VERSION];

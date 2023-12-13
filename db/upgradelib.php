@@ -44,10 +44,10 @@ function auth_campusconnect_populate_lastenroled() {
         }
         $i++;
 
-        $upd = (object)array(
+        $upd = (object)[
             'id' => $authrecord->id,
             'lastenroled' => $authrecord->lastenroled,
-        );
+        ];
         $DB->update_record('auth_campusconnect', $upd);
     }
 }

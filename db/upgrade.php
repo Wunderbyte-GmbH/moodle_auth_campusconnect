@@ -41,11 +41,11 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
         $table->add_field('username', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
 
         // Adding keys to table auth_campusconnect.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->add_key('ecsid', XMLDB_KEY_FOREIGN, array('ecsid'), 'local_campusconnect_ecs', array('id'));
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('ecsid', XMLDB_KEY_FOREIGN, ['ecsid'], 'local_campusconnect_ecs', ['id']);
 
         // Adding indexes to table auth_campusconnect.
-        $table->add_index('ecs_uid', XMLDB_INDEX_UNIQUE, array('ecs_uid'));
+        $table->add_index('ecs_uid', XMLDB_INDEX_UNIQUE, ['ecs_uid']);
 
         // Conditionally launch create table for auth_campusconnect.
         if (!$dbman->table_exists($table)) {
@@ -67,7 +67,7 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
         }
 
         // Define index username (unique) to be added to auth_campusconnect.
-        $index = new xmldb_index('username', XMLDB_INDEX_UNIQUE, array('username'));
+        $index = new xmldb_index('username', XMLDB_INDEX_UNIQUE, ['username']);
 
         // Conditionally launch add index username.
         if (!$dbman->index_exists($table, $index)) {
@@ -120,7 +120,7 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
 
         // Remove the index on ecs_uid.
         $table = new xmldb_table('auth_campusconnect');
-        $index = new xmldb_index('ecs_uid', XMLDB_INDEX_UNIQUE, array('ecs_uid'));
+        $index = new xmldb_index('ecs_uid', XMLDB_INDEX_UNIQUE, ['ecs_uid']);
 
         // Conditionally launch drop index ecs_uid.
         if ($dbman->index_exists($table, $index)) {
@@ -136,7 +136,7 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
         }
 
         // Create a new index on personid + personidtype.
-        $index = new xmldb_index('personid', XMLDB_INDEX_UNIQUE, array('personid', 'personidtype'));
+        $index = new xmldb_index('personid', XMLDB_INDEX_UNIQUE, ['personid', 'personidtype']);
 
         // Conditionally launch add index ecs_uid.
         if (!$dbman->index_exists($table, $index)) {
@@ -186,7 +186,7 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
                                         '', 'id, ecsid, pid');
         foreach ($rs as $authcc) {
             $pids = "{$authcc->ecsid}_{$authcc->pid}";
-            $DB->set_field('auth_campusconnect', 'pids', $pids, array('id' => $authcc->id));
+            $DB->set_field('auth_campusconnect', 'pids', $pids, ['id' => $authcc->id]);
         }
 
         // Campusconnect savepoint reached.
@@ -198,7 +198,7 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
         $table = new xmldb_table('auth_campusconnect');
 
         // Define key ecsid (foreign) to be dropped form auth_campusconnect.
-        $key = new xmldb_key('ecsid', XMLDB_KEY_FOREIGN, array('ecsid'), 'local_campusconnect_ecs', array('id'));
+        $key = new xmldb_key('ecsid', XMLDB_KEY_FOREIGN, ['ecsid'], 'local_campusconnect_ecs', ['id']);
         $dbman->drop_key($table, $key);
 
         // Define field ecsid to be dropped from auth_campusconnect.

@@ -109,7 +109,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         $ecssettings = new ecssettings($userdetails->ecsid);
         $defaultrole = $ecssettings->get_import_role();
         if ($defaultrole != "-1") {
-            $defaultroleid = $DB->get_field('role', 'id', array('shortname' => $defaultrole));
+            $defaultroleid = $DB->get_field('role', 'id', ['shortname' => $defaultrole]);
             role_assign($defaultroleid, $ccuser->id, $systemcontext->id);
         }
 
@@ -129,19 +129,19 @@ class auth_plugin_campusconnect extends auth_plugin_base {
             if ($fieldname = participantsettings::is_custom_field($field)) {
                 // Safe to check $user->profile, as we've used 'get_complete_user_data' above.
                 if (!isset($ccuser->profile[$fieldname]) || $ccuser->profile[$fieldname] != $value) {
-                    if ($fieldid = $DB->get_field('user_info_field', 'id', array('shortname' => $fieldname))) {
-                        if ($existing = $DB->get_record('user_info_data', array('fieldid' => $fieldid, 'userid' => $ccuser->id))) {
-                            $upd = (object)array(
+                    if ($fieldid = $DB->get_field('user_info_field', 'id', ['shortname' => $fieldname])) {
+                        if ($existing = $DB->get_record('user_info_data', ['fieldid' => $fieldid, 'userid' => $ccuser->id])) {
+                            $upd = (object)[
                                 'id' => $existing->id,
                                 'data' => $value,
-                            );
+                            ];
                             $DB->update_record('user_info_data', $upd);
                         } else {
-                            $ins = (object)array(
+                            $ins = (object)[
                                 'userid' => $ccuser->id,
                                 'fieldid' => $fieldid,
                                 'data' => $value,
-                            );
+                            ];
                             $DB->insert_record('user_info_data', $ins);
                         }
                         $ccuser->profile[$fieldname] = $value;
@@ -160,7 +160,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
 
         // Let index.php know that user is authenticated.
         global $frm, $user;
-        $frm = (object)array('username' => $ccuser->username, 'password' => '');
+        $frm = (object)['username' => $ccuser->username, 'password' => ''];
         $user = clone $ccuser;
         self::$authenticateduser = clone $ccuser;
     }
@@ -198,7 +198,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         }
         $urlquery = str_replace('&amp;', '&', $urlparse['query']);
         $queryparams = explode('&', $urlquery);
-        $paramassoc = array();
+        $paramassoc = [];
         foreach ($queryparams as $paramval) {
             $split = explode('=', $paramval);
             if (count($split) < 2) {
@@ -214,9 +214,9 @@ class auth_plugin_campusconnect extends auth_plugin_base {
             self::log("No courseid in the destination URL");
             return null; // URL didn't include a course ID.
         }
-        $courseurl = new moodle_url('/course/view.php', array('id' => $params['id']));
+        $courseurl = new moodle_url('/course/view.php', ['id' => $params['id']]);
         $courseurl = $courseurl->out(); // Legacy direct course URL.
-        $courseviewurl = new moodle_url('/local/campusconnect/viewcourse.php', array('id' => $params['id']));
+        $courseviewurl = new moodle_url('/local/campusconnect/viewcourse.php', ['id' => $params['id']]);
         $courseviewurl = $courseviewurl->out(); // Newer courselink destination URL.
         if (substr_compare($url, $courseurl, 0, strlen($courseurl)) !== 0) {
             $courseurl = $courseviewurl;
@@ -241,7 +241,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
             $hashurl = $params['ecs_hash_url'];
             self::log("ecs_hash_url found: {$params['ecs_hash_url']}");
 
-            $matches = array();
+            $matches = [];
             if (!preg_match('|(.*)/sys/auths/(.*)|', $hashurl, $matches)) {
                 self::log("Unable to parse ecs_hash_url");
                 return null; // Not able to parse the 'ecs_hash_url' successfully.
@@ -348,7 +348,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
             return null;
         }
 
-        return (object)array('ecsid' => $authenticatingecs, 'pid' => $pid, 'participant' => $participant);
+        return (object)['ecsid' => $authenticatingecs, 'pid' => $pid, 'participant' => $participant];
     }
 
     protected static function use_authentication_token($ecsid, $mid, $courseid) {
@@ -389,13 +389,13 @@ class auth_plugin_campusconnect extends auth_plugin_base {
             $personidtype = $params[courselink::PERSON_ID_TYPE];
             if (!in_array($personidtype, courselink::$validpersontypes)) {
                 self::log("Unknown ecs_person_id_type: {$personidtype}");
-                return array(null, null);
+                return [null, null];
             }
             if (empty($params[$personidtype])) {
                 self::log("Specified ecs_person_id_type: {$personidtype} not found in user details");
-                return array(null, null);
+                return [null, null];
             }
-            return array($personidtype, $params[$personidtype]);
+            return [$personidtype, $params[$personidtype]];
 
         } else {
             // Using legacy params.
@@ -405,9 +405,9 @@ class auth_plugin_campusconnect extends auth_plugin_base {
                 $uid = $params['ecs_uid_hash'];
             } else {
                 self::log("Neither ecs_uid nor ecs_uid_hash found in destination URL");
-                return array(null, null);
+                return [null, null];
             }
-            return array(courselink::PERSON_UID, $uid);
+            return [courselink::PERSON_UID, $uid];
         }
     }
 
@@ -418,7 +418,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      */
     public static function strip_port($url) {
         $parts = parse_url($url);
-        $wantedparts = array('scheme', 'host', 'path', 'query');
+        $wantedparts = ['scheme', 'host', 'path', 'query'];
         $ret = '';
         foreach ($wantedparts as $part) {
             if (array_key_exists($part, $parts)) {
@@ -446,7 +446,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
             return;
         }
 
-        if (!$authrecord = $DB->get_record('auth_campusconnect', array('username' => $USER->username))) {
+        if (!$authrecord = $DB->get_record('auth_campusconnect', ['username' => $USER->username])) {
             log::add("auth_campusconnect - user '{$USER->username}' missing record in auth_campusconnect database table");
             return; // Should really exist - log this and move on.
         }
@@ -457,7 +457,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         }
 
         // OK, delete.
-        $user = $DB->get_record('user', array('id' => $USER->id));
+        $user = $DB->get_record('user', ['id' => $USER->id]);
         $this->user_dataprotect_delete($user);
     }
 
@@ -468,7 +468,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * @return mixed array with no magic quotes or false on error
      */
     function get_userinfo($username) {
-        return array();
+        return [];
     }
 
     /**
@@ -480,9 +480,9 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         global $CFG, $DB;
 
         // Find users whose session should have expired by now and haven't ever enroled in a course.
-        $params = array(
+        $params = [
             'minaccess' => time() - $CFG->sessiontimeout,
-        );
+        ];
         $sql = "
         SELECT u.id, u.username
           FROM {user} u
@@ -498,7 +498,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
 
         // Make users who haven't enrolled in a long time inactive.
         $ecslist = ecssettings::list_ecs();
-        $ecsemails = array(); // We'll need it for later.
+        $ecsemails = []; // We'll need it for later.
         foreach ($ecslist as $ecsid => $ecsname) {
             // Get the activation period.
             $settings = new ecssettings($ecsid);
@@ -516,9 +516,9 @@ class auth_plugin_campusconnect extends auth_plugin_base {
                       JOIN {auth_campusconnect} ac ON u.username = ac.username
                      WHERE u.suspended = 0 AND u.deleted = 0 AND ac.lastenroled IS NOT NULL AND ac.lastenroled < :cutoff
                    ";
-            $params = array('cutoff' => $cutoff);
+            $params = ['cutoff' => $cutoff];
             $users = $DB->get_records_sql($sql, $params);
-            $userids = array();
+            $userids = [];
             foreach ($users as $user) {
                 if (self::matches_ecsid($user->pids, $ecsid)) {
                     $userids[] = $user->id;
@@ -549,11 +549,11 @@ class auth_plugin_campusconnect extends auth_plugin_base {
             $lastsent = 0;
         }
         $sendupto = time() - 1;
-        $params = array(
+        $params = [
             'auth' => $this->authtype,
             'lastsent' => $lastsent,
-            'sendupto' => $sendupto
-        );
+            'sendupto' => $sendupto,
+        ];
         $sql = "
         SELECT u.*, ac.pids
           FROM {user} u
@@ -564,7 +564,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         ";
         $newusers = $DB->get_records_sql($sql, $params);
         $adminuser = get_admin();
-        $notified = array();
+        $notified = [];
         foreach ($newusers as $newuser) {
             $subject = get_string('newusernotifysubject', 'auth_campusconnect');
             $messagetext = get_string('newusernotifybody', 'auth_campusconnect', $newuser);
@@ -595,7 +595,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
 
     protected static function get_ecsids($pids) {
         $pids = explode(',', $pids);
-        $ecsids = array();
+        $ecsids = [];
         foreach ($pids as $pid) {
             $pid = explode('_', $pid);
             $ecsid = intval($pid[0]);
@@ -628,13 +628,13 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         global $DB;
 
         // See if we already know about this user.
-        if ($ecsuser = $DB->get_record('auth_campusconnect', array('personid' => $personid, 'personidtype' => $personidtype))) {
+        if ($ecsuser = $DB->get_record('auth_campusconnect', ['personid' => $personid, 'personidtype' => $personidtype])) {
             self::update_user_pid($ecsuser, $ecsid, $pid);
             return $ecsuser->username; // User has previously authenticated here - just return their previous username.
         }
 
         $username = null;
-        if (!in_array($personidtype, array(courselink::PERSON_UID, courselink::PERSON_LOGIN))) {
+        if (!in_array($personidtype, [courselink::PERSON_UID, courselink::PERSON_LOGIN])) {
             // All other person id types may match an existing user => map the field name, then look for a match.
             $map = $participant->get_import_mappings();
             if (!empty($map[$personidtype])) { // This type is mapped onto a Moodle field.
@@ -646,10 +646,10 @@ class auth_plugin_campusconnect extends auth_plugin_base {
                               JOIN {user_info_data} ud ON ud.userid = u.id
                               JOIN {user_info_field} uf ON uf.id = ud.fieldid
                              WHERE uf.shortname = :fieldname AND ud.data = :personid';
-                    $users = $DB->get_records_sql($sql, array('fieldname' => $fieldname, 'personid' => $personid));
+                    $users = $DB->get_records_sql($sql, ['fieldname' => $fieldname, 'personid' => $personid]);
                 } else {
                     // Look for the personid in the 'user' table.
-                    $users = $DB->get_records('user', array($moodlefield => $personid), '', 'id, username');
+                    $users = $DB->get_records('user', [$moodlefield => $personid], '', 'id, username');
                 }
                 if (count($users) == 1) {
                     // All OK, we've matched up to an existing user.
@@ -709,7 +709,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
 
         // Make sure the username is unique.
         $i = 1;
-        while ($DB->record_exists('user', array('username' => $username))) {
+        while ($DB->record_exists('user', ['username' => $username])) {
             $username = $ecsusername.($i++);
         }
         return $username;
@@ -729,7 +729,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
             $pids[] = $ins;
             $pids = implode(',', $pids);
         }
-        $DB->set_field('auth_campusconnect', 'pids', $pids, array('id' => $ecsuser->id));
+        $DB->set_field('auth_campusconnect', 'pids', $pids, ['id' => $ecsuser->id]);
     }
 
     /**
@@ -741,11 +741,11 @@ class auth_plugin_campusconnect extends auth_plugin_base {
 
         // Clean personal information.
         $user->email = 'usr'.$user->id.'@'.'usr'.$user->id.'.com';
-        $fieldstoclear = array(
+        $fieldstoclear = [
             'idnumber', 'firstname', 'lastname',
             'yahoo', 'aim', 'msn', 'phone1', 'phone2', 'institution', 'department',
-            'address', 'city', 'country', 'lastip', 'url', 'description', 'imagealt'
-        );
+            'address', 'city', 'country', 'lastip', 'url', 'description', 'imagealt',
+        ];
         foreach ($fieldstoclear as $fieldname) {
             $user->{$fieldname} = '';
         }
@@ -755,7 +755,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         delete_user($user);
 
         // Delete logs.
-        $DB->delete_records('log', array('userid' => $user->id));
+        $DB->delete_records('log', ['userid' => $user->id]);
     }
 
     protected static function log($msg) {
