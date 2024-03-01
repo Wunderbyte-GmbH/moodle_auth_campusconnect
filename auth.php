@@ -545,7 +545,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
 
         // OK, delete.
         $user = $DB->get_record('user', ['id' => $USER->id]);
-        $this->user_dataprotect_delete($user);
+        self::user_dataprotect_delete($user);
     }
 
     /**
@@ -565,116 +565,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * @return mixed
      */
     protected function cron() {
-        global $CFG, $DB;
 
-        // Find users whose session should have expired by now and haven't ever enroled in a course.
-        $params = [
-            'minaccess' => time() - $CFG->sessiontimeout,
-        ];
-        $sql = "
-        SELECT u.id, u.username
-          FROM {user} u
-          JOIN {auth_campusconnect} ac ON ac.username = u.username
-         WHERE u.deleted = 0 AND u.lastaccess < :minaccess
-           AND ac.lastenroled IS NULL
-        ";
-        $deleteusers = $DB->get_records_sql($sql, $params);
-        foreach ($deleteusers as $deleteuser) {
-            mtrace(get_string('deletinguser', 'auth_campusconnect').': '.$deleteuser->id);
-            $this->user_dataprotect_delete($deleteuser);
-        }
-
-        // Make users who haven't enrolled in a long time inactive.
-        $ecslist = ecssettings::list_ecs();
-        $ecsemails = []; // We'll need it for later.
-        foreach ($ecslist as $ecsid => $ecsname) {
-            // Get the activation period.
-            $settings = new ecssettings($ecsid);
-            $monthsago = $settings->get_import_period();
-            $month = date('n') - $monthsago;
-            $year = date('Y');
-            $day = date('j');
-            if ($month < 1) {
-                $year += floor(($month - 1) / 12);
-                $month = $month % 12 + 12;
-            }
-            $cutoff = mktime(date('H'), date('i'), date('s'), $month, $day, $year);
-            $sql = "SELECT u.id, ac.pids
-                      FROM {user} u
-                      JOIN {auth_campusconnect} ac ON u.username = ac.username
-                     WHERE u.suspended = 0 AND u.deleted = 0 AND ac.lastenroled IS NOT NULL AND ac.lastenroled < :cutoff
-                   ";
-            $params = ['cutoff' => $cutoff];
-            $users = $DB->get_records_sql($sql, $params);
-            $userids = [];
-            foreach ($users as $user) {
-                if (self::matches_ecsid($user->pids, $ecsid)) {
-                    $userids[] = $user->id;
-                }
-            }
-            if (!empty($userids)) {
-                list($usql, $params) = $DB->get_in_or_equal($userids);
-                $DB->execute("UPDATE {user}
-                                 SET suspended = 1
-                               WHERE id $usql", $params);
-                // Trigger an event for all users.
-                foreach ($DB->get_recordset_list('user', 'id', $userids) as $user) {
-                    if ($CFG->version >= 2013111800) {
-                        \core\session\manager::kill_user_sessions($user->id);
-                    } else {
-                        \core\session\manager::kill_user_sessions($user->id);  // Just in case the user is currently logged in.
-                    }
-                    \core\event\user_updated::create_from_userid($user->id)->trigger();
-                }
-            }
-
-            // For later.
-            $ecsemails[$ecsid] = $settings->get_notify_users();
-        }
-
-        // Notify relevant users about new accounts.
-        if (!$lastsent = get_config('auth_campusconnect', 'lastnewusersemailsent')) {
-            $lastsent = 0;
-        }
-        $sendupto = time() - 1;
-        $params = [
-            'auth' => $this->authtype,
-            'lastsent' => $lastsent,
-            'sendupto' => $sendupto,
-        ];
-        $sql = "
-        SELECT u.*, ac.pids
-          FROM {user} u
-          JOIN {auth_campusconnect} ac ON ac.username = u.username
-         WHERE deleted = 0
-           AND u.timecreated > :lastsent
-           AND u.timecreated <= :sendupto
-        ";
-        $newusers = $DB->get_records_sql($sql, $params);
-        $adminuser = get_admin();
-        $notified = [];
-        foreach ($newusers as $newuser) {
-            $subject = get_string('newusernotifysubject', 'auth_campusconnect');
-            $messagetext = get_string('newusernotifybody', 'auth_campusconnect', $newuser);
-            $ecsids = self::get_ecsids($newuser->pids);
-            foreach ($ecsids as $ecsid) {
-                if (!isset($ecslist[$ecsid])) {
-                    mtrace(get_string('usernamecantfindecs', 'auth_campusconnect').': '.$newuser->username);
-                    continue;
-                }
-                if (!isset($notified[$ecsid])) {
-                    list($in, $params) = $DB->get_in_or_equal($ecsemails[$ecsid]);
-                    $notified[$ecsid] = $DB->get_records_select('user', "username $in", $params);
-                }
-                foreach ($notified[$ecsid] as $recepient) {
-                    email_to_user($recepient, $adminuser, $subject, $messagetext);
-                }
-            }
-        }
-
-        set_config('lastnewusersemailsent', $sendupto, 'auth_campusconnect');
-
-        return true;
     }
 
     /**
@@ -686,7 +577,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * @return mixed
      *
      */
-    protected static function matches_ecsid($pids, $ecsid) {
+    public static function matches_ecsid($pids, $ecsid) {
         return in_array($ecsid, self::get_ecsids($pids));
     }
 
@@ -698,7 +589,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * @return mixed
      *
      */
-    protected static function get_ecsids($pids) {
+    public static function get_ecsids($pids) {
         $pids = explode(',', $pids);
         $ecsids = [];
         foreach ($pids as $pid) {
@@ -856,7 +747,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      *
      * @return void
      */
-    private function user_dataprotect_delete($user) {
+    public static function user_dataprotect_delete($user) {
         global $DB;
 
         // Clean personal information.
