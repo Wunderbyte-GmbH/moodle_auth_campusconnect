@@ -57,6 +57,10 @@ class authcampusconnect extends \core\task\scheduled_task {
     public function execute() {
         global $CFG, $DB;
 
+        // Cron - delete users who timed out and never enrolled.
+        // Inactivate users who haven't been active for some time.
+        // And notify relevant users about users created.
+
         // Find users whose session should have expired by now and haven't ever enroled in a course.
         $params = [
             'minaccess' => time() - $CFG->sessiontimeout,

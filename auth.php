@@ -378,7 +378,13 @@ class auth_plugin_campusconnect extends auth_plugin_base {
                                 continue;
                             }
                         }
-                        if (!$participant = self::use_authentication_token($ecsid, $auth->mid, $params['id'])) {
+
+                        // First we check if authentication should work via SSO.
+
+                        if (self::use_sso_authentication($ecsid, $auth->mid, $params['id'])) {
+                            self::log("Abort, as authentication will be handled by SSO.");
+                            return null;
+                        } else if (!$participant = self::use_authentication_token($ecsid, $auth->mid, $params['id'])) {
                             $connecterrors = false; // Ignore connection errors in this case.
                             self::log("Authentication token is valid, but is from a participant we are not accepting tokens from");
                             break; // Do not check against any other ECS.
@@ -421,6 +427,26 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         $export = new export($courseid);
         if ($export->should_handle_auth_token($ecsid, $mid)) {
             return $export->get_participant($ecsid, $mid); // We are accepting authentication tokens from this participant.
+        }
+        // Ignore the token, as we're not handling authentication from that participant.
+        return false;
+    }
+
+    /**
+     * Use authentication token.
+     *
+     * @param mixed $ecsid
+     * @param mixed $mid
+     * @param mixed $courseid
+     *
+     * @return bool
+     *
+     */
+    protected static function use_sso_authentication($ecsid, $mid, $courseid) {
+        // Check the participant settings to see if we should be handling tokens from this participant.
+        $export = new export($courseid);
+        if ($export->should_use_sso($ecsid, $mid)) {
+            return true;
         }
         // Ignore the token, as we're not handling authentication from that participant.
         return false;
@@ -556,16 +582,6 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      */
     public function get_userinfo($username) {
         return [];
-    }
-
-    /**
-     * Cron - delete users who timed out and never enrolled,
-     * Inactivate users who haven't been active for some time
-     * And notify relevant users about users created
-     * @return mixed
-     */
-    protected function cron() {
-
     }
 
     /**
