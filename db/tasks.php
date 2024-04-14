@@ -18,14 +18,14 @@
  * Booking module scheduled tasks definition
  *
  * @package    auth_campusconnect
- * @copyright  2009-2023 David Bogner
+ * @copyright  2009-2024 David Bogner
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $tasks = [
-    ['classname' => 'auth_campusconnect\task\campusconnect',
+    ['classname' => 'auth_campusconnect\task\authcampusconnect',
         'blocking' => 0,
         'minute' => '*',
         'hour' => '*',
