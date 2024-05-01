@@ -383,7 +383,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
 
                         if (self::use_sso_authentication($ecsid, $auth->mid, $params['id'])) {
                             self::log("Abort, as authentication will be handled by SSO.");
-                            return null;
+                            break; // Do not check against any other ECS.
                         } else if (!$participant = self::use_authentication_token($ecsid, $auth->mid, $params['id'])) {
                             $connecterrors = false; // Ignore connection errors in this case.
                             self::log("Authentication token is valid, but is from a participant we are not accepting tokens from");
