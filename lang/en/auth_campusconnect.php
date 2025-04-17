@@ -23,11 +23,11 @@
  */
 
 $string['auth_campusconnectdescription'] = 'Authenticates user from another participant by verifying ECS hash in the URL against the ECS server';
-$string['usernamecantfindecs'] = 'Could not find ECS id in username';
+$string["campusconnecttask"] = "campusconnecttask";
 $string['deletinguser'] = 'Deleting user';
 $string['errorcreatinguser'] = 'Error creating user';
-$string['newusernotifysubject'] = 'CampusConnect user created';
 $string['newusernotifybody'] = 'A new user was created by SSO login from another CampusConnect participant: {$a->firstname} {$a->lastname}.';
+$string['newusernotifysubject'] = 'CampusConnect user created';
 $string['pluginname'] = 'CampusConnect';
 $string['privacy:metadata:auth_campusconnect'] = 'Extra information stored about a user to enable CampusConnect login';
 $string['privacy:metadata:auth_campusconnect:lastenroled'] = 'The timestamp for when the user last enroled in a course';
@@ -37,3 +37,4 @@ $string['privacy:metadata:auth_campusconnect:pids'] = 'Stores the ids of partici
 $string['privacy:metadata:auth_campusconnect:suspended'] = 'Record whether or not the user was suspended, so can spot changes when \'user_updated\' events occur.';
 $string['privacy:metadata:auth_campusconnect:username'] = 'The generated username for this user';
 $string['privacy:path:auth_campusconnect'] = 'CampusConnect authentication';
+$string['usernamecantfindecs'] = 'Could not find ECS id in username';

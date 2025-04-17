@@ -25,10 +25,11 @@
 namespace auth_campusconnect\task;
 
 use auth_plugin_campusconnect;
+use local_campusconnect\ecssettings;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/local/campusconnect/lib.php');
+require_once($CFG->dirroot . '/local/campusconnect/lib.php');
 
 /**
  * Class to handle scheduled task that removes relicts and unnecessary artifacts from the DB.
@@ -38,7 +39,6 @@ require_once($CFG->dirroot.'/local/campusconnect/lib.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class authcampusconnect extends \core\task\scheduled_task {
-
     /**
      * Get name of module.
      * @return string
@@ -74,7 +74,7 @@ class authcampusconnect extends \core\task\scheduled_task {
         ";
         $deleteusers = $DB->get_records_sql($sql, $params);
         foreach ($deleteusers as $deleteuser) {
-            mtrace(get_string('deletinguser', 'auth_campusconnect').': '.$deleteuser->id);
+            mtrace(get_string('deletinguser', 'auth_campusconnect') . ': ' . $deleteuser->id);
             auth_plugin_campusconnect::user_dataprotect_delete($deleteuser);
         }
 
@@ -107,7 +107,7 @@ class authcampusconnect extends \core\task\scheduled_task {
                 }
             }
             if (!empty($userids)) {
-                list($usql, $params) = $DB->get_in_or_equal($userids);
+                [$usql, $params] = $DB->get_in_or_equal($userids);
                 $DB->execute("UPDATE {user}
                                  SET suspended = 1
                                WHERE id $usql", $params);
@@ -153,11 +153,11 @@ class authcampusconnect extends \core\task\scheduled_task {
             $ecsids = auth_plugin_campusconnect::get_ecsids($newuser->pids);
             foreach ($ecsids as $ecsid) {
                 if (!isset($ecslist[$ecsid])) {
-                    mtrace(get_string('usernamecantfindecs', 'auth_campusconnect').': '.$newuser->username);
+                    mtrace(get_string('usernamecantfindecs', 'auth_campusconnect') . ': ' . $newuser->username);
                     continue;
                 }
                 if (!isset($notified[$ecsid])) {
-                    list($in, $params) = $DB->get_in_or_equal($ecsemails[$ecsid]);
+                    [$in, $params] = $DB->get_in_or_equal($ecsemails[$ecsid]);
                     $notified[$ecsid] = $DB->get_records_select('user', "username $in", $params);
                 }
                 foreach ($notified[$ecsid] as $recepient) {
