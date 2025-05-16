@@ -23,7 +23,7 @@
  */
 
 $string['auth_campusconnectdescription'] = 'Authenticates user from another participant by verifying ECS hash in the URL against the ECS server';
-$string["campusconnecttask"] = "campusconnecttask";
+$string['campusconnecttask'] = "Delete timed out or never enrolled campus connect users";
 $string['deletinguser'] = 'Deleting user';
 $string['errorcreatinguser'] = 'Error creating user';
 $string['newusernotifybody'] = 'A new user was created by SSO login from another CampusConnect participant: {$a->firstname} {$a->lastname}.';
