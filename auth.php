@@ -33,7 +33,7 @@ use local_campusconnect\participantsettings;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->libdir.'/authlib.php');
+require_once($CFG->libdir . '/authlib.php');
 
 /**
  * Class for CampusConnect authentication plugin.
