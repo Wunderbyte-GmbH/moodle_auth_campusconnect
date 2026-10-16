@@ -114,12 +114,7 @@ class authcampusconnect extends \core\task\scheduled_task {
                 // Trigger an event for all users.
                 foreach ($DB->get_recordset_list('user', 'id', $userids) as $user) {
                     // Just in case the user is currently logged in.
-                    if (method_exists('\core\session\manager', 'destroy_user_sessions')) {
-                        \core\session\manager::destroy_user_sessions($user->id);
-                    } else {
-                        // Keep this for backwards compatibility.
-                        \core\session\manager::kill_user_sessions($user->id);
-                    }
+                    \core\session\manager::destroy_user_sessions($user->id);
                     \core\event\user_updated::create_from_userid($user->id)->trigger();
                 }
             }
