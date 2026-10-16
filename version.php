@@ -27,5 +27,5 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version = 2026072400;  // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires = 2024110000; // M5.0.
 $plugin->component = 'auth_campusconnect'; // Full name of the plugin (used for diagnostics).
-$plugin->supported = [500, 501];
+$plugin->supported = [500, 503];
 $plugin->dependencies = ['local_campusconnect' => ANY_VERSION];
