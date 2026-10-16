@@ -40,10 +40,10 @@ use core_privacy\local\request\writer;
  * @copyright 2019 Davo Smith, Synergy Learning
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements \core_privacy\local\metadata\provider,
-                          \core_privacy\local\request\plugin\provider,
-                          \core_privacy\local\request\core_userlist_provider {
-
+class provider implements
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\plugin\provider {
     /**
      * Get metadata.
      *
@@ -202,10 +202,9 @@ class provider implements \core_privacy\local\metadata\provider,
         if (!$userids = $userlist->get_userids()) {
             return;
         }
-        list($usql, $params) = $DB->get_in_or_equal($userids);
+        [$usql, $params] = $DB->get_in_or_equal($userids);
         $select = "id $usql";
         $usernames = $DB->get_fieldset_select('user', 'username', $select, $params);
         $DB->delete_records_list('auth_campusconnect', 'username', $usernames);
     }
-
 }

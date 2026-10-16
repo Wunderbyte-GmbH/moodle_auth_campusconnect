@@ -37,8 +37,7 @@ use core_privacy\tests\provider_testcase;
  *
  * @covers \auth_campusconnect\auth
  */
-class privacy_provider_test extends provider_testcase {
-
+final class privacy_provider_test extends provider_testcase {
     /**
      * userwithrecord
      * @var mixed
@@ -62,6 +61,7 @@ class privacy_provider_test extends provider_testcase {
      */
     protected function setUp(): void {
         global $DB;
+        parent::setUp();
         $this->resetAfterTest();
 
         $gen = self::getDataGenerator();
@@ -94,7 +94,7 @@ class privacy_provider_test extends provider_testcase {
     /**
      * Test for provider::get_metadata().
      */
-    public function test_get_metadata() {
+    public function test_get_metadata(): void {
         $collection = new collection('auth_campusconnect');
         $newcollection = provider::get_metadata($collection);
         $itemcollection = $newcollection->get_collection();
@@ -119,7 +119,7 @@ class privacy_provider_test extends provider_testcase {
     /**
      * Test for provider::get_contexts_for_userid().
      */
-    public function test_get_contexts_for_userid() {
+    public function test_get_contexts_for_userid(): void {
         $contextlist = provider::get_contexts_for_userid($this->userwithrecord->id);
         $this->assertEquals([\context_system::instance()->id], $contextlist->get_contextids());
 
@@ -130,7 +130,7 @@ class privacy_provider_test extends provider_testcase {
     /**
      * Test for provider::export_user_data().
      */
-    public function test_export_for_context() {
+    public function test_export_for_context(): void {
         $ctx = \context_system::instance();
 
         // Export all of the data for the context.
@@ -147,7 +147,7 @@ class privacy_provider_test extends provider_testcase {
     /**
      * Test for provider::delete_data_for_all_users_in_context().
      */
-    public function test_delete_data_for_all_users_in_context() {
+    public function test_delete_data_for_all_users_in_context(): void {
         global $DB;
 
         provider::delete_data_for_all_users_in_context(\context_system::instance());
@@ -157,21 +157,24 @@ class privacy_provider_test extends provider_testcase {
     /**
      * Test for provider::delete_data_for_user().
      */
-    public function test_delete_data_for_user() {
+    public function test_delete_data_for_user(): void {
         global $DB;
 
         $ctx = \context_system::instance();
-        $contextlist = new \core_privacy\local\request\approved_contextlist($this->userwithrecord, 'auth_campusconnect',
-                                                                            [$ctx->id]);
+        $contextlist = new \core_privacy\local\request\approved_contextlist(
+            $this->userwithrecord,
+            'auth_campusconnect',
+            [$ctx->id]
+        );
         provider::delete_data_for_user($contextlist);
 
         $recs = $DB->get_records('auth_campusconnect', []);
         $this->assertCount(1, $recs);
-        list($rec) = array_values($recs);
+        [$rec] = array_values($recs);
         $this->assertEquals($this->userwithrecord2->username, $rec->username);
     }
 
-    public function test_get_users_in_context() {
+    public function test_get_users_in_context(): void {
         $ctx = \context_system::instance();
 
         $userlist = new \core_privacy\local\request\userlist($ctx, 'auth_campusconnect');
@@ -181,7 +184,7 @@ class privacy_provider_test extends provider_testcase {
         $this->assertEquals([$this->userwithrecord->id, $this->userwithrecord2->id], $userlist->get_userids(), '', 0.0, 10, true);
     }
 
-    public function test_delete_data_for_users() {
+    public function test_delete_data_for_users(): void {
         $ctx = \context_system::instance();
 
         $approvedlist = new \core_privacy\local\request\approved_userlist($ctx, 'auth_campusconnect', [$this->userwithrecord->id]);

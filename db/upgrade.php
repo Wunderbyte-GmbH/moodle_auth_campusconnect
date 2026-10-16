@@ -39,7 +39,6 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2012111500) {
-
         // Define table auth_campusconnect to be created.
         $table = new xmldb_table('auth_campusconnect');
 
@@ -88,7 +87,7 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
     }
 
     if ($oldversion < 2014012300) {
-        require_once($CFG->dirroot.'/auth/campusconnect/db/upgradelib.php');
+        require_once($CFG->dirroot . '/auth/campusconnect/db/upgradelib.php');
         auth_campusconnect_populate_lastenroled();
 
         // Campusconnect savepoint reached.
@@ -96,7 +95,6 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
     }
 
     if ($oldversion < 2014061900) {
-
         // Define field pid to be added to auth_campusconnect.
         $table = new xmldb_table('auth_campusconnect');
         $field = new xmldb_field('pid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'ecsid');
@@ -111,7 +109,6 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
     }
 
     if ($oldversion < 2014062000) {
-
         // Define field personidtype to be added to auth_campusconnect.
         $table = new xmldb_table('auth_campusconnect');
         $field = new xmldb_field('personidtype', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, 'ecs_uid', 'lastenroled');
@@ -126,7 +123,6 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
     }
 
     if ($oldversion < 2014062001) {
-
         // Remove the index on ecs_uid.
         $table = new xmldb_table('auth_campusconnect');
         $index = new xmldb_index('ecs_uid', XMLDB_INDEX_UNIQUE, ['ecs_uid']);
@@ -157,7 +153,6 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
     }
 
     if ($oldversion < 2014062400) {
-
         // Define field suspended to be added to auth_campusconnect.
         $table = new xmldb_table('auth_campusconnect');
         $field = new xmldb_field('suspended', XMLDB_TYPE_INTEGER, '2', null, null, null, '0', 'personidtype');
@@ -174,7 +169,6 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
     // Transition from ecsid + pid => pids.
 
     if ($oldversion < 2014081900) {
-
         // Define field pids to be added to auth_campusconnect.
         $table = new xmldb_table('auth_campusconnect');
         $field = new xmldb_field('pids', XMLDB_TYPE_TEXT, null, null, null, null, null, 'ecsid');
@@ -188,11 +182,15 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2014081900, 'auth', 'campusconnect');
     }
     if ($oldversion < 2014081901) {
-
         // Copy the old data from ecsid + pid into pids.
         mtrace("Converting user pid records - this may take a while to complete");
-        $rs = $DB->get_recordset_select('auth_campusconnect', "pids IS NULL AND pid IS NOT NULL AND pid <> ''", null,
-                                        '', 'id, ecsid, pid');
+        $rs = $DB->get_recordset_select(
+            'auth_campusconnect',
+            "pids IS NULL AND pid IS NOT NULL AND pid <> ''",
+            null,
+            '',
+            'id, ecsid, pid'
+        );
         foreach ($rs as $authcc) {
             $pids = "{$authcc->ecsid}_{$authcc->pid}";
             $DB->set_field('auth_campusconnect', 'pids', $pids, ['id' => $authcc->id]);
@@ -202,7 +200,6 @@ function xmldb_auth_campusconnect_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2014081901, 'auth', 'campusconnect');
     }
     if ($oldversion < 2014081902) {
-
         // Remove the old fields.
         $table = new xmldb_table('auth_campusconnect');
 

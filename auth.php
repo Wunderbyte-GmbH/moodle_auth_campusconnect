@@ -43,7 +43,6 @@ require_once($CFG->libdir . '/authlib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auth_plugin_campusconnect extends auth_plugin_base {
-
     /**
      * authenticateduser
      * @var mixed
@@ -66,7 +65,8 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      * @return bool Authentication success or failure.
      */
     public function user_login($username, $password) {
-        if (isset(self::$authenticateduser)
+        if (
+            isset(self::$authenticateduser)
             && is_object(self::$authenticateduser)
             && isset(self::$authenticateduser->id)
         ) {
@@ -144,10 +144,10 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         }
 
         if (isset($userdetails->ecsid)) {
-            unset ($userdetails->ecsid);
+            unset($userdetails->ecsid);
         }
         if (isset($ccuser->ecsid)) {
-            unset ($ccuser->ecsid);
+            unset($ccuser->ecsid);
         }
 
         self::log("User account details:");
@@ -337,7 +337,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         foreach ($ecslist as $ecsid => $ecsname) {
             $settings = new ecssettings($ecsid);
             if ($baseurl) {
-                self::log("Comparing hash URL: {$baseurl} with ECS server '$ecsname' ($ecsid): ".$settings->get_url());
+                self::log("Comparing hash URL: {$baseurl} with ECS server '$ecsname' ($ecsid): " . $settings->get_url());
             } else {
                 self::log("Attempting to authenticate hash against '{$ecsname}' ($ecsid)");
             }
@@ -365,7 +365,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
                         if (isset($auth->sov)) {
                             $sov = strtotime($auth->sov);
                             if ($sov && $sov > $now) {
-                                self::log("Start of validation timestamp ({$auth->sov} = {$sov})".
+                                self::log("Start of validation timestamp ({$auth->sov} = {$sov})" .
                                           " is after the current time ({$now})");
                                 continue;
                             }
@@ -373,7 +373,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
                         if (isset($auth->eov)) {
                             $eov = strtotime($auth->eov);
                             if ($eov && $eov < $now) {
-                                self::log("End of validation timestamp ({$auth->eov} = {$eov})".
+                                self::log("End of validation timestamp ({$auth->eov} = {$eov})" .
                                           " is before the current time ({$now})");
                                 continue;
                             }
@@ -395,7 +395,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
                     }
                 } catch (connect_exception $e) {
                     $connecterrors = true;
-                    self::log("Connection error during authentication: ".$e->getMessage());
+                    self::log("Connection error during authentication: " . $e->getMessage());
                 }
             }
         }
@@ -465,7 +465,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      */
     protected static function get_user_details($ecsid, $pid, participantsettings $participant, $params) {
 
-        list($personidtype, $personid) = self::get_person_id($params);
+        [$personidtype, $personid] = self::get_person_id($params);
         if ($personidtype === null) {
             return null; // Required field missing from the params.
         }
@@ -473,8 +473,15 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         $ecsusername = isset($params['ecs_login']) ? $params['ecs_login'] : null;
 
         $userdetails = $participant->map_import_data($params);
-        $userdetails->username = self::username_from_params($institution, $ecsusername, $personidtype, $personid,
-                                                            $ecsid, $pid, $participant);
+        $userdetails->username = self::username_from_params(
+            $institution,
+            $ecsusername,
+            $personidtype,
+            $personid,
+            $ecsid,
+            $pid,
+            $participant
+        );
 
         if (!$userdetails->username) {
             return null; // Something went wrong with getting a username for this user.
@@ -506,7 +513,6 @@ class auth_plugin_campusconnect extends auth_plugin_base {
                 return [null, null];
             }
             return [$personidtype, $params[$personidtype]];
-
         } else {
             // Using legacy params.
             if (!empty($params['ecs_uid'])) {
@@ -635,8 +641,15 @@ class auth_plugin_campusconnect extends auth_plugin_base {
      *
      * @return string
      */
-    protected static function username_from_params($institution, $ecsusername, $personidtype, $personid,
-                                                   $ecsid, $pid, participantsettings $participant) {
+    protected static function username_from_params(
+        $institution,
+        $ecsusername,
+        $personidtype,
+        $personid,
+        $ecsid,
+        $pid,
+        participantsettings $participant
+    ) {
         global $DB;
 
         // See if we already know about this user.
@@ -667,7 +680,6 @@ class auth_plugin_campusconnect extends auth_plugin_base {
                     // All OK, we've matched up to an existing user.
                     $user = reset($users);
                     $username = $user->username;
-
                 } else if (count($users) > 1) {
                     self::log("More than one user found with {$moodlefield} (mapped from {$personidtype}) set to {$personid}");
                     return null;
@@ -707,15 +719,15 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         global $DB;
 
         // Generate a new username for this user.
-        $prefix = $orgabbr.'_';
+        $prefix = $orgabbr . '_';
         if ($ecsusername) {
             // If a remote username is specified, the generated username will be '{orgabbr}_{username}{NN}'.
-            $ecsusername = $prefix.$ecsusername;
+            $ecsusername = $prefix . $ecsusername;
             $username = $ecsusername;
         } else {
             // If no remote username is specified, the generated username will just be '{orgabbr}_{NN}'.
             $ecsusername = $prefix;
-            $username = $ecsusername.'1';
+            $username = $ecsusername . '1';
         }
 
         // Clean the username, so it only includes valid characters.
@@ -724,7 +736,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         // Make sure the username is unique.
         $i = 1;
         while ($DB->record_exists('user', ['username' => $username])) {
-            $username = $ecsusername.($i++);
+            $username = $ecsusername . ($i++);
         }
         return $username;
     }
@@ -767,7 +779,7 @@ class auth_plugin_campusconnect extends auth_plugin_base {
         global $DB;
 
         // Clean personal information.
-        $user->email = 'usr'.$user->id.'@'.'usr'.$user->id.'.com';
+        $user->email = 'usr' . $user->id . '@' . 'usr' . $user->id . '.com';
         $fieldstoclear = [
             'idnumber', 'firstname', 'lastname',
             'yahoo', 'aim', 'msn', 'phone1', 'phone2', 'institution', 'department',
