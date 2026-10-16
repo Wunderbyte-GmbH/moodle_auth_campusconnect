@@ -34,9 +34,8 @@ use core_privacy\tests\provider_testcase;
  * @package   auth_campusconnect
  * @copyright 2019 Davo Smith, Synergy Learning
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * @covers \auth_campusconnect\auth
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(provider::class)]
 final class privacy_provider_test extends provider_testcase {
     /**
      * userwithrecord
@@ -181,7 +180,7 @@ final class privacy_provider_test extends provider_testcase {
         provider::get_users_in_context($userlist);
         $this->assertCount(2, $userlist);
 
-        $this->assertEquals([$this->userwithrecord->id, $this->userwithrecord2->id], $userlist->get_userids(), '', 0.0, 10, true);
+        $this->assertEqualsCanonicalizing([$this->userwithrecord->id, $this->userwithrecord2->id], $userlist->get_userids());
     }
 
     public function test_delete_data_for_users(): void {
